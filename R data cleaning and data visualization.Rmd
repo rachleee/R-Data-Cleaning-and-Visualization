@@ -1,0 +1,84 @@
+---
+title: "Data Cleaning and Visualization"
+author: "Rachel Lee"
+date: "2024-05-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load("tidyverse") #This project uses tidyverse for pipeline.
+```
+
+## Data Cleaning and Visualization for CSV of Study Performance
+
+This project uses a CSV file from Kaggle. I have modified the CSV to have some blank values to showcase data cleaning. The inital CSV file is from: https://www.kaggle.com/datasets/spscientist/students-performance-in-exams
+
+### Data Cleaning
+
+In this section, it will: 
+  1. Clean up the data values of NA. 
+  2. Removes the word of 'group' in the race_ethnicity section due to its redundancy. 
+
+```{r Data_Cleaning}
+
+study_performance <- read.csv("study_performance.csv", na.strings = "") #reading the csv of the study performance. I got this data set from Kaggle.
+
+summary(study_performance) #to see the columns of the csv
+
+head(study_performance)
+
+######### Cleaning up data values ##########
+
+study_performance[is.na(study_performance)] <- 0 #making the NA values to be zero
+head(study_performance) #printing a few rows to check if it worked
+
+#in the race_ethnicity, removing 'group' because it is too redunant
+#reference is from: https://www.digitalocean.com/community/tutorials/sub-and-gsub-function-r
+
+study_performance <- study_performance %>% mutate(race_ethnicity = gsub("group ", "", race_ethnicity)) #changing the word 'group' to be blank. Also using mutate for dplyr function.
+
+head(study_performance) #printing out a few of the rows in race_ethnicity to check.
+
+
+```
+
+### Putting Data in Columns
+This section will create a new column for the average score. It will also delete columns of math_score, reading_score, and writing_score.
+
+```{r Data_Columns}
+
+study_performance <- study_performance %>% mutate(average_score = (math_score + reading_score + writing_score) /3) #adding another column called average_score usind dyplr's mutate
+
+study_performance <- study_performance %>% select( -c(math_score, reading_score, writing_score)) #deleting the columns of math_score, reading_score, and writing_score
+
+head(study_performance) #printing out a few of the rows to see if it created a new column and deleted the old columns.
+
+```
+
+
+### Data Visualization
+This section will create a data visualization for the data of:
+  1. different race ethnicity vs the average score in a boxplot
+  2. gender and race ethnicity against the average score in a plot.
+  
+The 2 different data visualization will use GGPLOT2.
+
+```{r Data_Visualization}
+
+###PLOT 1 ###
+#creating a boxplot for the different race ethnicity vs the average score
+ggplot(study_performance, aes(x = race_ethnicity, y = average_score, color = race_ethnicity )) +
+  geom_boxplot() +
+  facet_wrap(~race_ethnicity) +
+  labs(x = "Race Ethnicity", y = "Average Score", title = "The Performance of Race Ethnicity Over Average Score") + theme_classic() + scale_color_brewer(type = "qual", palette = 2)
+
+
+###PLOT 2 ###
+#creating a plot of the gender and race ethnicity against the average score
+
+ggplot(study_performance, aes(fill = race_ethnicity, x = gender, y = average_score)) + 
+  geom_bar(position = 'dodge', stat = 'identity') +
+  labs(x = "Gender", y = "Average Score", title = "The Gender and Race Ethnicity Against the Average Score") + scale_fill_manual(values = c("#7c6d9e", "#291e42", "#26408B", "#A6CFD5", "#C2E7D9"))
+
+```
