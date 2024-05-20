@@ -1,4 +1,4 @@
-# R-Data-Science
+# R-Data-Cleaning and Visualization
 
 ## About the Project
 This repository is to showcase my project of data cleaning and data visualization using R. It uses R with packages of **GGPLOT2** and **tidyverse** for data visualization and pipeline, respectively.
